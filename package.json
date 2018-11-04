@@ -1,12 +1,49 @@
 {
-  "name": "rollup-create-react-app",
-  "version": "0.0.1",
-  "main": "lib/rollup.config.js",
-  "license": "MIT",
+  "name": "lib-create-react-app",
+  "version": "0.0.2",
+  "description": "Share React components from create react app by Harald Rudell",
+  "author": "Harald Rudell <harald.rudell@gmail.com> (http://haraldrudell.com)",
+  "license": "ISC",
   "scripts": {
-    "build": "rollup --config src/rollup.config.js"
+    "build": "rollup --config src/rollup.config.js",
+    "clean": "rimraf bin lib",
+    "reinstall": "npm-run-all --serial reinstall:*",
+    "reinstall:clean": "rimraf node_modules",
+    "reinstall:install": "yarn"
+  },
+  "main": "lib/libCreateReactApp",
+  "module": "lib/libCreateReactApp",
+  "bin": {
+    "preplib": "bin/preplib"
+  },
+  "keywords": [
+    "Create React App",
+    "React",
+    "Component",
+    "Library",
+    "lib",
+    "rollup"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/haraldrudell/lib-create-react-app"
   },
   "dependencies": {
-    "rollup": "^0.66.6"
+    "fs-extra": "^7.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "7",
+    "@babel/plugin-proposal-class-properties": "^7.1.0",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.8.0",
+    "npm-run-all": "^4.1.3",
+    "rimraf": "^2.6.2",
+    "rollup": "^0.66.6",
+    "rollup-plugin-babel": "^4.0.3",
+    "rollup-plugin-commonjs": "^9.2.0",
+    "rollup-plugin-eslint": "^5.0.0",
+    "rollup-plugin-json": "^3.1.0",
+    "rollup-plugin-node-resolve": "^3.4.0",
+    "rollup-plugin-shebang": "^0.1.5"
   }
 }
