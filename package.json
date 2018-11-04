@@ -1,0 +1,12 @@
+{
+  "name": "rollup-create-react-app",
+  "version": "0.0.1",
+  "main": "lib/rollup.config.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "rollup --config src/rollup.config.js"
+  },
+  "dependencies": {
+    "rollup": "^0.66.6"
+  }
+}
