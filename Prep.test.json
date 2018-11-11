@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "buildlib": "rollup --config src/lib.rollup.js",
+    "pub": "npm-run-all --serial buildlib test 'pub:*'",
+    "pub:yarn": "echo yarn publish"
+  },
+  "files": [
+    "lib",
+    "README.md"
+  ]
+}

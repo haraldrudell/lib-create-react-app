@@ -8,7 +8,7 @@ import nodeExternals from './nodeExternals'
 
 const extensions = {
   main: '.js',
-  module: '.mjs'
+  module: '.mjs',
 }
 
 export function readPackageJson({filename, strings}) {
