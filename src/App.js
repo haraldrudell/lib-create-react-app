@@ -1,1 +1,1 @@
-export default App = () => text
+export default App = () => 'text'

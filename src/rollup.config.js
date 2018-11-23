@@ -16,31 +16,38 @@ import { readPackageJson, getExternal, formats, mergeRollups } from './rollup/le
 import chmod from './rollup/rollupChmodPlugin'
 import shebang from './rollup/rollupShebangPlugin'
 
-import { updateJson } from './libifier/updateJson'
-updateJson()
+import { updateJson } from './rollup/updateJson'
+updateJson() // read data files into a JSON later imported
 
 // get path constants
-const { dependencies } = readPackageJson({strings: {main: 'ext', module: 'ext', dependencies: 1}})
+const { dependencies } = readPackageJson({strings: {dependencies: 1}})
 const external = getExternal({dependencies})
+const rollupConfigJs = 'rollup.config.js'
 const dirs = {
   project: path.resolve(),
 }
 Object.assign(dirs, {
   src: path.join(dirs.project, 'src'),
   bin: path.join(dirs.project, 'bin'),
+  lib: path.join(dirs.project, 'lib'),
 })
 Object.assign(dirs, {
   srcPreplib: path.join(dirs.src, 'preplib.js'),
   binPreplib: path.join(dirs.bin, 'preplib'),
+  srcBuilderRollup: path.join(dirs.src, 'builder', rollupConfigJs),
+  libRollup: path.join(dirs.lib, rollupConfigJs),
 })
 
-const rollupConfigJs = getRollupConfig()
+const rollupConfig = getRollupConfig()
 
 export default [{
   input: dirs.srcPreplib,
   output: {file: dirs.binPreplib, format: formats.cjs.format},
   plugins: [shebang(), chmod()],
-}].map(o => mergeRollups(rollupConfigJs, o))
+},{
+  input: dirs.srcBuilderRollup,
+  output: {file: dirs.libRollup, format: formats.esm.format},
+}].map(o => mergeRollups(rollupConfig, o))
 
 function getRollupConfig() {
   const includeExclude = {
@@ -56,7 +63,7 @@ function getRollupConfig() {
       json(),
       babel({
         ...includeExclude,
-        plugins: ['@babel/plugin-proposal-class-properties'/*classProperties(),*/],
+        plugins: ['@babel/plugin-proposal-class-properties'],
       }),
       commonjs(),
     ],

@@ -12,10 +12,12 @@ import commonjs from 'rollup-plugin-commonjs'
 
 import path from 'path'
 
-import { readPackageJson, getExternal, formats, mergeRollups } from './letsroll'
+import { readPackageJson, getExternal, formats, mergeRollups } from '../rollup/letsroll'
 
 // get path constants
-const {main, module, dependencies} = readPackageJson({strings: {main: 'ext', module: 'ext', dependencies: 1}})
+const strings = {main: 'ext', module: 'ext', dependencies: 1}
+const filename = path.resolve('lib.json')
+const {main, module, dependencies} = readPackageJson({filename, strings})
 const external = getExternal({dependencies})
 const dirs = {
   project: path.resolve(),
@@ -49,10 +51,10 @@ function getRollupConfig() {
       eslint(includeExclude),
       resolve({extensions: ['.mjs', '.js', '.json']}),
       json(),
-      babel({
-        ...includeExclude,
-        plugins: ['@babel/plugin-proposal-class-properties'],
-      }),
+      babel(Object.assign({},
+        includeExclude,
+        {plugins: ['@babel/plugin-proposal-class-properties']},
+      )),
       commonjs(),
     ],
   }

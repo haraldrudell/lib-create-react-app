@@ -5,11 +5,12 @@ This source code is licensed under the ISC-style license found in the LICENSE fi
 import fs from 'fs'
 import path from 'path'
 
-import json from './libifier.json'
+import json from '../libifier/libifier.json'
 
 const files = {
   LICENSE: 'LICENSE',
   libindex: 'libindex.js',
+  README: 'README.md',
 }
 const dir = path.join(path.resolve(), 'src', 'libifier')
 

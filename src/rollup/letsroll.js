@@ -12,6 +12,7 @@ const extensions = {
 }
 
 export function readPackageJson({filename, strings}) {
+
   // we can't use async here, so this is so 80s
   filename = filename ? String(filename) : path.resolve('package.json')
   let pjson
@@ -51,7 +52,9 @@ export const formats = [{format: 'cjs', ext: '.js', id: 0}, {format: 'esm', ext:
 export function mergeRollups(...args) {
   const result = {}
   for (let arg of args) {
-    const {plugins, ...props} = Object(arg)
+    const {plugins} = Object(arg)
+    const props = Object.assign({}, arg)
+    delete props.plugins
     Object.assign(result, props)
     if (plugins !== undefined) {
       if (!Array.isArray(plugins)) throw new Error('plugins property not array')

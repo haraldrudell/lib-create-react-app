@@ -52,11 +52,15 @@ export default class JSONer {
     }
 
     if (updates.length) {
-      console.log(`writing package.json: ${updates.join('\x20')}`)
-      await fs.writeFile(filename, JSON.stringify(pjson, null, '\x20\x20'))
+      console.log(`Writing package.json: ${updates.join('\x20')}`)
+      await this.writeJSON(filename, pjson)
     }
 
     return {updates, pjson} // array string updates, resulting json
+  }
+
+  async writeJSON(filename, json) {
+    return fs.writeFile(filename, JSON.stringify(json, null, '\x20\x20'))
   }
 
   isObject(o) {
