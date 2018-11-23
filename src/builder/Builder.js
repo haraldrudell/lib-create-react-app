@@ -6,11 +6,18 @@ import path from 'path'
 
 import { spawnAsync } from 'allspawn'
 
-export default class Builder {
+import { JSONer } from '../util'
+
+export default class Builder extends JSONer {
+  static prepJsonFile = path.join(__dirname, 'lib.config.json')
+
   async build() {
     const rollup = path.join(__dirname, '..', 'node_modules', '.bin', 'rollup')
     const rollupConfigJs = path.join(__dirname, '..', 'src', 'rollup', 'rollup.config.js')
     // rollup echoes to stderr
     return spawnAsync({args: [rollup, '--config', rollupConfigJs], echo: true})
-  }
+    await Promise.all([
+      await this.updateJson({scripts}),
+      ])
+    }
 }

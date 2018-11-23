@@ -7,8 +7,8 @@
   "scripts": {
     "build": "npm-run-all --serial 'build:*' ",
     "build:binPrepLib": "rollup --config src/rollup.config.js",
-    "build:eslint": "eslint src/rollup.config.js src/rollup/*",
-    "build:cleaup": "rimraf tmp lib",
+    "build:eslint": "eslint src/rollup.config.js src/builder/rollup.config.js src/rollup/*.js",
+    "build:cleanup": "rimraf tmp lib",
     "clean": "rimraf bin",
     "reinstall": "npm-run-all --serial reinstall:*",
     "reinstall:clean": "rimraf node_modules",

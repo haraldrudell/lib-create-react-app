@@ -2,79 +2,51 @@
 © 2018-present Harald Rudell <harald.rudell@gmail.com> (http://www.haraldrudell.com)
 This source code is licensed under the ISC-style license found in the LICENSE file in the root directory of this source tree.
 */
+import { spawnAsync } from 'allspawn'
 import fs from 'fs-extra'
 
 import path from 'path'
 
-import prepJson from './prep.json'
+import json from './libifier.json'
+import { JSONer } from '../util'
 
-export default class Libifier {
-  static filename = path.resolve('package.json')
-  static prepJsonFile = path.join(__dirname, 'prep.json')
-  static prepJsonFile = path.join(__dirname, 'lib.config.json')
-  pwd = path.resolve()
-
-  constructor() {
-    const {prepJsonFile} = Libifier
-    const {scripts: newScripts} = this.getScriptsObject({json: prepJson, filename: prepJsonFile})
-    Object.assign(this, {newFiles: prepJson.files, newScripts})
-  }
+export default class Libifier extends JSONer {
+  static libifierFile = path.join(__dirname, 'libifier.json')
 
   async libify() {
-    const t0 = Date.now()
     await Promise.all([
-      this.updateJson(),
+      this.updateJsonAndInstall(),
+      this.write('LICENSE', path.join(path.resolve(), 'LICENSE')),
+      this.write('libindex', path.join(path.resolve(), 'src', 'libindex.js')),
     ])
-    const seconds = (Date.now() - t0) / 1e3
-    console.log(`Completed in ${seconds.toFixed(1)} s`)
+    this.printElapsed()
   }
 
-  async updateJson(filename) {
-    const {newScripts, newFiles} = this
-    const updates = []
+  async updateJsonAndInstall() {
 
-    // read the React project's package.json
-    if (!filename) {
-      filename = Libifier.filename
-      console.log(`reading: ${this.getRelative(filename)}`)
-    }
-    const pjson = require(filename)
-    const {scripts, isChange} = this.getScriptsObject({json: pjson, filename})
-    if (isChange) updates.push('scripts') // json.scripts was updated
+    // add scripts entries to package.json
+    const {libifierFile: filename} = Libifier
+    const {pjson} = await this.updateJson(this.getScriptsObject({json, filename}))
 
-    // merge in newScripts
-    for (let [script, command] of Object.entries(newScripts)) {
-      if (scripts[script] === undefined) {
-        updates.push(`scripts.${script}`)
-        scripts[script] = command
-      }
-    }
+    // install devDependencies from json.install[] to pjson.devDependencies/dependencies
+    let wantedPkgs = Object(json).install
+    if (Array.isArray(wantedPkgs)) {
+      const pkgs = Object.assign({}, Object(pjson).devDependencies, Object(pjson).dependencies)
+      wantedPkgs = wantedPkgs
+        .filter(v => v && typeof v === 'string')
+        .filter(pkg => pkgs[pkg] === undefined)
+    } else wantedPkgs = []
 
-    // merge in files
-    if (newFiles && pjson.files === undefined) {
-      updates.push(`files`)
-      pjson.files = newFiles
-    }
-
-    if (updates.length) {
-      console.log(`writing package.json: ${updates.join('\x20')}`)
-      await fs.writeFile(filename, JSON.stringify(pjson, null, '\x20\x20'))
+    if (wantedPkgs.length) {
+      console.log(`Installing npm packages: ${wantedPkgs,join('\x20')}`)
+      await spawnAsync({args: ['yarn', 'add', '--dev'].concat(wantedPkgs), echo: true})
     }
   }
 
-  isObject(o) {
-    return typeof o === 'object' && !Array.isArray(o)
+  async write(key, filename) {
+    if (! await fs.exists(filename)) {
+      console.log(`Writing: ${filename}`)
+      await fs.writeFile(filename, json[key])
+    }
   }
-
-  getScriptsObject({json, filename}) {
-    let isChange = false
-    if (!this.isObject(json)) throw new Error(`package.json content not object reading file: ${filename}`)
-    let {scripts} = json
-    if (!this.isObject(scripts)) {
-      isChange = true
-      scripts = json.scripts = {}
-    } else if (!Object.values(scripts).every(v => v && typeof v === 'string')) throw new Error(`scripts values not string in file: ${filename}`)
-    return {scripts, isChange}
-  }
-
 }
