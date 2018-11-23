@@ -5,43 +5,32 @@ This source code is licensed under the ISC-style license found in the LICENSE fi
 import { spawnAsync } from 'allspawn'
 import fs from 'fs-extra'
 
-import path from 'path'
+import { JSONer } from 'jsonutil'
+import { filePackData, getDirs, getFilePackFilename } from 'letsroll'
 
-import { JSONer } from '../util'
 import json from './libifier.json'
-import libJson from './lib.json'
+import libifierPackageJson from './package.json'
 
 export default class Libifier extends JSONer {
-  static libifierFile = path.join(__dirname, 'libifier.json')
-  static libJsonFile = path.resolve('lib.json')
-  static files = [{
-    property: 'LICENSE',
-    file: path.join(path.resolve(), 'LICENSE'),
-  },{
-    property: 'README',
-    file: path.join(path.resolve(), 'README.md'),
-  },{
-    property: 'libindex',
-    file: path.join(path.resolve(), 'src', 'libindex.js'),
-  }]
-
   async libify() {
-    const {files} = Libifier
+    const {publish, publishPackageJson, src} = getDirs()
+    const files = filePackData({publish, src})
+    await fs.ensureDir(publish)
     await Promise.all([
-      this.updateJsonAndInstall(),
-    ].concat(files.map(o => this.writeFileIfNotExists(o.property, o.file))))
+      this.updateJsonAndInstall(publishPackageJson),
+    ].concat(files.map(o => this.writeFileIfNotExists(o.jsonKey, o.output))))
     this.printElapsed()
   }
 
-  async updateJsonAndInstall() {
+  async updateJsonAndInstall(publishPackageJson) {
 
     // add scripts entries to package.json
-    const {libifierFile: filename} = Libifier
+    const filename = getFilePackFilename(__dirname)
     const {pjson} = await this.updateJson(this.getScriptsObject({json, filename}))
 
     return Promise.all([
       this.ensureDevDependencies(pjson),
-      this.ensureLibJson(pjson),
+      this.ensureLibJson(pjson, publishPackageJson),
     ])
   }
 
@@ -63,14 +52,13 @@ export default class Libifier extends JSONer {
     }
   }
 
-  async ensureLibJson(pjson) {
-    const {libJsonFile} = Libifier
-    if (await fs.exists(libJsonFile)) return
+  async ensureLibJson(pjson, publishPackageJson) {
+    if (await fs.exists(publishPackageJson)) return
 
     // write ./lib.json
     const newLibJson = {}
-    const {properties, must} = Object(libJson)
-    if (typeof properties !== 'object' || typeof must !== 'object') throw new Error(`Bad lib.json: ${JSON.stringify(libJson)}`)
+    const {properties, must} = Object(libifierPackageJson)
+    if (typeof properties !== 'object' || typeof must !== 'object') throw new Error(`Bad lib.json: ${JSON.stringify(libifierPackageJson)}`)
     for (let [key, value] of Object.entries(properties)) {
       let newValue
       const now = pjson[key]
@@ -86,8 +74,8 @@ export default class Libifier extends JSONer {
       newValue !== undefined && (newLibJson[key] = newValue)
     }
     Object.assign(newLibJson, must)
-    console.log(`Writing: ${this.getRelative(libJsonFile)}`)
-    return this.writeJSON(libJsonFile, newLibJson)
+    console.log(`Writing: ${this.getRelative(publishPackageJson)}`)
+    return this.writeJSON(publishPackageJson, newLibJson)
   }
 
   async writeFileIfNotExists(key, filename) {

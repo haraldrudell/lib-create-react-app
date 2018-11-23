@@ -10,34 +10,10 @@ import babel from 'rollup-plugin-babel'
 import json from 'rollup-plugin-json'
 import commonjs from 'rollup-plugin-commonjs'
 
-import path from 'path'
+import { readPackageJson, getExternal, formats, mergeRollups, updateJson, chmod, shebang, directoryResolver, getLibCraDirs } from './letsroll/index.js'
 
-import { readPackageJson, getExternal, formats, mergeRollups } from './rollup/letsroll'
-import chmod from './rollup/rollupChmodPlugin'
-import shebang from './rollup/rollupShebangPlugin'
-
-import { updateJson } from './rollup/updateJson'
 updateJson() // read data files into a JSON later imported
-
-// get path constants
-const { dependencies } = readPackageJson({strings: {dependencies: 1}})
-const external = getExternal({dependencies})
-const rollupConfigJs = 'rollup.config.js'
-const dirs = {
-  project: path.resolve(),
-}
-Object.assign(dirs, {
-  src: path.join(dirs.project, 'src'),
-  bin: path.join(dirs.project, 'bin'),
-  lib: path.join(dirs.project, 'lib'),
-})
-Object.assign(dirs, {
-  srcPreplib: path.join(dirs.src, 'preplib.js'),
-  binPreplib: path.join(dirs.bin, 'preplib'),
-  srcBuilderRollup: path.join(dirs.src, 'builder', rollupConfigJs),
-  libRollup: path.join(dirs.lib, rollupConfigJs),
-})
-
+const dirs = getLibCraDirs()
 const rollupConfig = getRollupConfig()
 
 export default [{
@@ -50,6 +26,7 @@ export default [{
 }].map(o => mergeRollups(rollupConfig, o))
 
 function getRollupConfig() {
+  const external = getExternal(readPackageJson({strings: {dependencies: 1}}))
   const includeExclude = {
     include: ['**/*.js', '**/*.mjs'],
     exclude: 'node_modules/**',
@@ -59,7 +36,8 @@ function getRollupConfig() {
     external,
     plugins: [
       eslint(includeExclude),
-      resolve({extensions: ['.mjs', '.js', '.json']}),
+      directoryResolver({paths: 'src'}),
+      resolve({jail: process.cwd()}),
       json(),
       babel({
         ...includeExclude,

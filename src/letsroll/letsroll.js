@@ -11,7 +11,7 @@ const extensions = {
   module: '.mjs',
 }
 
-export function readPackageJson({filename, strings}) {
+export function readPackageJson({filename, strings, baseDir = ''}) {
 
   // we can't use async here, so this is so 80s
   filename = filename ? String(filename) : path.resolve('package.json')
@@ -29,15 +29,15 @@ export function readPackageJson({filename, strings}) {
     let value = Object(pjson)[prop]
     if (propArg !== 1) {
       if (!value || typeof value !== 'string') throw new Error(`key: ${prop}: not non-empty string in file: '${filename}'`)
-      if (propArg === 'ext') value = resolveExt(value, extensions[prop])
+      if (propArg === 'ext') value = resolveExt(value, extensions[prop], baseDir)
     }
     result[prop] = value
   }
   return result
 }
 
-export function resolveExt(file, ext) {
-  file = path.resolve(String(file))
+export function resolveExt(file, ext, baseDir) {
+  file = path.resolve(baseDir, String(file))
   if (ext && !path.extname(file)) file += ext
   return file
 }

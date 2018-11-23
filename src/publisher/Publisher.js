@@ -5,34 +5,15 @@ This source code is licensed under the ISC-style license found in the LICENSE fi
 import { spawnAsync } from 'allspawn'
 import fs from 'fs-extra'
 
-import path from 'path'
+import { getDirs } from 'letsroll'
 
 export default class Publisher {
-  static libDir = path.join(path.resolve(), 'lib')
-  static publishDir = path.join(path.resolve(), 'tmpub')
-
   async publish() {
-    const {publishDir: cwd} = Publisher
+    const {publish: cwd, publishPackageJson} = getDirs()
 
-    await this.havePublish(true)
+    if (!await fs.exists(publishPackageJson)) throw new Error(`File does not exist: missing libprep execution? '${pjsonBuilt}'`)
 
-    const args = ['yarn', 'publish', '--access', 'public']
+    const args = ['yarn', 'publish', '--patch', '--access', 'public']
     await spawnAsync({args, echo: true, options: {cwd, stdio: 'inherit'}})
-      .catch(async e => {
-        await fs.havePublish(false).catch(console.error)
-        throw e
-      })
-
-    return this.havePublish(false)
-  }
-
-  async havePublish(yes) {
-    const {libDir, publishDir} = Publisher
-    if (yes) {
-    // clone lib to a directory not in .gitignore
-    await fs.emptyDir(publishDir)
-      return fs.copy(libDir, publishDir)
-    }
-    return fs.remove(publishDir)
   }
 }

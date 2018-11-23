@@ -10,25 +10,14 @@ import babel from 'rollup-plugin-babel'
 import json from 'rollup-plugin-json'
 import commonjs from 'rollup-plugin-commonjs'
 
-import path from 'path'
-
-import { readPackageJson, getExternal, formats, mergeRollups } from '../rollup/letsroll'
+import { readPackageJson, getExternal, formats, mergeRollups, getDirs } from '../letsroll/index.js'
 
 // get path constants
 const strings = {main: 'ext', module: 'ext', dependencies: 1}
-const filename = path.resolve('lib.json')
-const {main, module, dependencies} = readPackageJson({filename, strings})
+const dirs = getDirs()
+const {publishPackageJson: filename, publish: baseDir} = dirs
+let {main, module, dependencies} = readPackageJson({filename, strings, baseDir})
 const external = getExternal({dependencies})
-const dirs = {
-  project: path.resolve(),
-}
-Object.assign(dirs, {
-  src: path.join(dirs.project, 'src'),
-})
-Object.assign(dirs, {
-  srcLibIndexJs: path.join(dirs.src, 'libindex.js'),
-})
-
 const rollupConfigJs = getRollupConfig()
 
 export default [{
