@@ -5,7 +5,6 @@ This source code is licensed under the ISC-style license found in the LICENSE fi
 this is the entry point of bin/preplib from lib-create-react-app package
 */
 import Libifier from './libifier'
-import Builder from './builder'
 import Publisher from './publisher'
 
 run({args: process.argv.slice(2)}).catch(errorHandler)
