@@ -11,7 +11,6 @@ import Publisher from './publisher'
 run({args: process.argv.slice(2)}).catch(errorHandler)
 
 async function run({args}) {
-  if (args.length === 1 && args[0] === 'build') return new Builder().build()
   if (args.length === 1 && args[0] === 'publish') return new Publisher().publish()
   if (args.length) throw new Error(`preplib: no arguments allowed, received: '${args.join('\x20')}'`)
   return new Libifier().libify()

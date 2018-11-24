@@ -9,8 +9,9 @@ import resolve from 'rollup-plugin-node-resolve'
 import babel from 'rollup-plugin-babel'
 import json from 'rollup-plugin-json'
 import commonjs from 'rollup-plugin-commonjs'
+import { chmod, shebang, directoryResolver } from 'rollup-plugin-thatworks'
 
-import { readPackageJson, getExternal, formats, mergeRollups, updateJson, chmod, shebang, directoryResolver, getLibCraDirs } from './letsroll/index.js'
+import { readPackageJson, getExternal, formats, mergeRollups, updateJson, getLibCraDirs } from './letsroll/index.js'
 
 updateJson() // read data files into a JSON later imported
 const dirs = getLibCraDirs()
@@ -20,9 +21,6 @@ export default [{
   input: dirs.srcPreplib,
   output: {file: dirs.binPreplib, format: formats.cjs.format},
   plugins: [shebang(), chmod()],
-},{
-  input: dirs.srcBuilderRollup,
-  output: {file: dirs.libRollup, format: formats.esm.format},
 }].map(o => mergeRollups(rollupConfig, o))
 
 function getRollupConfig() {
