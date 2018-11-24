@@ -67,7 +67,9 @@ export function mergeRollups(...args) {
   return result
 }
 
-export function getExternal({external, dependencies}) {
-  if (!Array.isArray(external)) external = nodeExternals
-  return [].concat(external, Object.keys(Object(dependencies)))
+export function getExternal({external, dependencies, peerDependencies}) {
+  return (Array.isArray(external) ? external : nodeExternals).concat(
+    Object.keys(Object(dependencies)),
+    Object.keys(Object(peerDependencies))
+    )
 }
