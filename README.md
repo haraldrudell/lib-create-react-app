@@ -2,6 +2,8 @@
 
 **[Lib Create React App](https://github.com/haraldrudell/lib-create-react-app)** allows React components to be publicly published as npm packages
 
+[click for **Video presentation**, 10 min](https://youtu.be/KVaOVjiH2SQ)
+
 ## © 2018-present Harald Rudell <harald.rudell@gmail.com> (http://www.haraldrudell.com)
 
 &emsp;
